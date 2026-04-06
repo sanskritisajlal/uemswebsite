@@ -1,0 +1,1269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>UEMS — University Event Management System</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+/* ── Reset & Base ───────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --ink:      #0e0f11;
+  --ink2:     #3a3d45;
+  --muted:    #8a8f9e;
+  --line:     #e4e6ec;
+  --bg:       #f6f7fb;
+  --surface:  #ffffff;
+  --blue:     #2457ef;
+  --blue-lt:  #e8eeff;
+  --green:    #16a34a;
+  --green-lt: #dcfce7;
+  --red:      #dc2626;
+  --red-lt:   #fee2e2;
+  --amber:    #d97706;
+  --amber-lt: #fef3c7;
+  --radius:   12px;
+  --shadow:   0 1px 3px rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.06);
+  --shadow-lg:0 8px 40px rgba(0,0,0,.12);
+}
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  min-height: 100vh;
+  line-height: 1.6;
+}
+
+/* ── Layout ─────────────────────────────────────────────── */
+.app { display: flex; flex-direction: column; min-height: 100vh; }
+
+/* ── Nav ────────────────────────────────────────────────── */
+.nav {
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+  padding: 0 32px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  height: 60px;
+  position: sticky; top: 0; z-index: 100;
+}
+.nav-logo {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.2rem;
+  color: var(--blue);
+  letter-spacing: -.5px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+.nav-logo span { color: var(--ink); }
+.nav-spacer { flex: 1; }
+.nav-user {
+  display: flex; align-items: center; gap: 10px;
+  font-size: .875rem; color: var(--ink2);
+}
+.nav-avatar {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: var(--blue-lt); color: var(--blue);
+  font-weight: 600; font-size: .8rem;
+  display: flex; align-items: center; justify-content: center;
+}
+.nav-badge {
+  font-size: .7rem; font-weight: 600; text-transform: uppercase;
+  letter-spacing: .5px; padding: 2px 8px; border-radius: 99px;
+  background: var(--blue-lt); color: var(--blue);
+}
+.nav-badge.faculty { background: var(--amber-lt); color: var(--amber); }
+.nav-badge.admin   { background: #f3e8ff; color: #7c3aed; }
+
+/* ── Main content ───────────────────────────────────────── */
+.main { flex: 1; max-width: 1080px; margin: 0 auto; padding: 40px 24px; width: 100%; }
+
+/* ── Splash / Login / Register screen ──────────────────── */
+.splash {
+  display: flex; align-items: center; justify-content: center;
+  min-height: calc(100vh - 60px); padding: 40px 24px;
+}
+.splash-inner { max-width: 440px; width: 100%; }
+.splash-badge {
+  display: inline-block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: .7rem; color: var(--blue); background: var(--blue-lt);
+  padding: 4px 12px; border-radius: 99px; margin-bottom: 20px;
+  letter-spacing: .5px;
+}
+.splash-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 2.4rem; line-height: 1.15;
+  color: var(--ink); margin-bottom: 8px;
+}
+.splash-title em { color: var(--blue); font-style: italic; }
+.splash-sub { color: var(--muted); font-size: .95rem; margin-bottom: 36px; }
+
+/* ── Card ───────────────────────────────────────────────── */
+.card {
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--radius); padding: 28px;
+  box-shadow: var(--shadow);
+}
+.card-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.3rem; color: var(--ink); margin-bottom: 20px;
+}
+.card-title .icon { margin-right: 8px; }
+
+/* ── Tab switcher ───────────────────────────────────────── */
+.tabs {
+  display: flex; gap: 4px; background: var(--bg);
+  border-radius: 8px; padding: 4px; margin-bottom: 24px;
+}
+.tab-btn {
+  flex: 1; padding: 8px; border: none; background: transparent;
+  border-radius: 6px; font-family: 'DM Sans', sans-serif;
+  font-size: .875rem; font-weight: 500; color: var(--muted);
+  cursor: pointer; transition: all .15s;
+}
+.tab-btn.active {
+  background: var(--surface); color: var(--ink);
+  box-shadow: 0 1px 4px rgba(0,0,0,.1);
+}
+
+/* ── Form ───────────────────────────────────────────────── */
+.form-group { margin-bottom: 16px; }
+.form-label {
+  display: block; font-size: .8rem; font-weight: 600;
+  color: var(--ink2); margin-bottom: 6px; text-transform: uppercase;
+  letter-spacing: .5px;
+}
+.form-input, .form-select {
+  width: 100%; padding: 10px 14px; border: 1.5px solid var(--line);
+  border-radius: 8px; font-family: 'DM Sans', sans-serif;
+  font-size: .9rem; color: var(--ink); background: var(--surface);
+  transition: border-color .15s, box-shadow .15s; outline: none;
+}
+.form-input:focus, .form-select:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(36,87,239,.12);
+}
+.form-hint {
+  font-size: .75rem; color: var(--muted); margin-top: 4px;
+}
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+/* ── Buttons ────────────────────────────────────────────── */
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 10px 20px; border-radius: 8px; border: none;
+  font-family: 'DM Sans', sans-serif; font-size: .9rem;
+  font-weight: 600; cursor: pointer; transition: all .15s;
+  text-decoration: none;
+}
+.btn-primary {
+  background: var(--blue); color: #fff; width: 100%;
+  justify-content: center;
+}
+.btn-primary:hover { background: #1a44d4; transform: translateY(-1px); }
+.btn-secondary {
+  background: var(--bg); color: var(--ink2);
+  border: 1.5px solid var(--line);
+}
+.btn-secondary:hover { background: var(--line); }
+.btn-danger  { background: var(--red); color: #fff; }
+.btn-danger:hover { background: #b91c1c; }
+.btn-sm { padding: 6px 14px; font-size: .8rem; }
+.btn-full { width: 100%; justify-content: center; }
+
+/* ── Alert / Toast ──────────────────────────────────────── */
+.alert {
+  padding: 12px 16px; border-radius: 8px; font-size: .875rem;
+  margin-bottom: 16px; display: flex; align-items: flex-start; gap: 10px;
+  animation: slideIn .2s ease;
+}
+.alert-success { background: var(--green-lt); color: #166534; border: 1px solid #bbf7d0; }
+.alert-error   { background: var(--red-lt);   color: #991b1b; border: 1px solid #fecaca; }
+.alert-info    { background: var(--blue-lt);  color: #1e40af; border: 1px solid #bfdbfe; }
+.alert-warn    { background: var(--amber-lt); color: #92400e; border: 1px solid #fde68a; }
+@keyframes slideIn { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:translateY(0); } }
+
+/* ── Dashboard ──────────────────────────────────────────── */
+.page-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.8rem; color: var(--ink); margin-bottom: 4px;
+}
+.page-sub { color: var(--muted); font-size: .9rem; margin-bottom: 32px; }
+
+.stats-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; margin-bottom: 32px; }
+.stat-card {
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow);
+}
+.stat-label { font-size: .75rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px; }
+.stat-value { font-size: 2rem; font-weight: 700; color: var(--ink); line-height: 1; }
+.stat-sub { font-size: .75rem; color: var(--muted); margin-top: 4px; }
+
+/* ── Content grid ───────────────────────────────────────── */
+.content-grid { display: grid; grid-template-columns: 1fr 340px; gap: 24px; }
+@media(max-width:768px){ .content-grid { grid-template-columns:1fr; } .stats-grid { grid-template-columns:1fr 1fr; } }
+
+/* ── Section heading ────────────────────────────────────── */
+.sec-head {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 16px;
+}
+.sec-title { font-size: 1rem; font-weight: 600; color: var(--ink); }
+.sec-count { font-size: .8rem; color: var(--muted); background: var(--bg); padding: 2px 10px; border-radius: 99px; }
+
+/* ── Event cards ────────────────────────────────────────── */
+.events-list { display: flex; flex-direction: column; gap: 12px; }
+.event-card {
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--radius); padding: 18px 20px;
+  box-shadow: var(--shadow); transition: box-shadow .15s, transform .15s;
+  display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: start;
+}
+.event-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-2px); }
+.event-title { font-weight: 600; font-size: .95rem; color: var(--ink); margin-bottom: 4px; }
+.event-meta { font-size: .8rem; color: var(--muted); display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 10px; }
+.event-meta span { display: flex; align-items: center; gap: 4px; }
+.event-progress { margin-top: 8px; }
+.progress-bar {
+  height: 4px; background: var(--line); border-radius: 2px; overflow: hidden;
+}
+.progress-fill { height: 100%; border-radius: 2px; transition: width .3s; }
+.progress-green { background: var(--green); }
+.progress-amber { background: var(--amber); }
+.progress-red   { background: var(--red); }
+.progress-label { font-size: .72rem; color: var(--muted); margin-top: 4px; }
+.event-actions { display: flex; flex-direction: column; gap: 6px; align-items: flex-end; }
+.tag {
+  font-size: .7rem; font-weight: 600; text-transform: uppercase;
+  letter-spacing: .5px; padding: 3px 10px; border-radius: 99px;
+}
+.tag-full    { background: var(--red-lt);   color: var(--red); }
+.tag-open    { background: var(--green-lt); color: var(--green); }
+.tag-limited { background: var(--amber-lt); color: var(--amber); }
+.tag-mine    { background: var(--blue-lt);  color: var(--blue); }
+
+/* ── Users table ─────────────────────────────────────────── */
+.users-table { width: 100%; border-collapse: collapse; font-size: .875rem; }
+.users-table th {
+  text-align: left; padding: 8px 12px; font-size: .72rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .5px; color: var(--muted);
+  border-bottom: 1.5px solid var(--line);
+}
+.users-table td { padding: 12px; border-bottom: 1px solid var(--line); color: var(--ink2); }
+.users-table tr:last-child td { border-bottom: none; }
+.users-table tr:hover td { background: var(--bg); }
+.role-chip {
+  font-size: .7rem; font-weight: 600; text-transform: uppercase;
+  letter-spacing: .4px; padding: 2px 8px; border-radius: 99px;
+}
+.role-student { background: var(--blue-lt); color: var(--blue); }
+.role-faculty { background: var(--amber-lt); color: var(--amber); }
+.role-admin   { background: #f3e8ff; color: #7c3aed; }
+
+/* ── Test suite ─────────────────────────────────────────── */
+.test-section { margin-bottom: 24px; }
+.test-section-title {
+  font-size: .8rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .8px; color: var(--muted); margin-bottom: 10px;
+  padding-bottom: 8px; border-bottom: 1px solid var(--line);
+}
+.test-row {
+  display: grid; grid-template-columns: 120px 70px 1fr auto;
+  gap: 12px; align-items: start; padding: 10px 0;
+  border-bottom: 1px solid var(--bg); font-size: .85rem;
+}
+.test-row:last-child { border-bottom: none; }
+.test-id { font-family: 'JetBrains Mono', monospace; font-size: .78rem; color: var(--blue); font-weight: 600; }
+.test-type-badge {
+  font-size: .68rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .4px; padding: 2px 8px; border-radius: 4px;
+  text-align: center;
+}
+.type-valid   { background: var(--green-lt); color: var(--green); }
+.type-invalid { background: var(--red-lt);   color: var(--red); }
+.test-desc { color: var(--ink2); }
+.test-msg  { font-size: .75rem; color: var(--muted); margin-top: 2px; font-family: 'JetBrains Mono', monospace; }
+.status-pass { color: var(--green); font-weight: 700; font-size: .8rem; }
+.status-fail { color: var(--red);   font-weight: 700; font-size: .8rem; }
+
+/* ── Perf bar ────────────────────────────────────────────── */
+.perf-row { display: flex; align-items: center; gap: 16px; padding: 12px 0; border-bottom: 1px solid var(--bg); }
+.perf-label { font-size: .875rem; color: var(--ink2); width: 200px; flex-shrink: 0; }
+.perf-value { font-family: 'JetBrains Mono', monospace; font-size: .9rem; font-weight: 600; color: var(--ink); }
+.perf-bar-wrap { flex: 1; height: 6px; background: var(--line); border-radius: 3px; overflow: hidden; }
+.perf-bar-fill { height: 100%; background: var(--green); border-radius: 3px; transition: width .6s ease; }
+
+/* ── Right sidebar ───────────────────────────────────────── */
+.sidebar .card { margin-bottom: 16px; }
+.quick-action {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 12px; border-radius: 8px; cursor: pointer;
+  transition: background .15s; color: var(--ink2);
+  font-size: .875rem; border: none; background: none; width: 100%; text-align: left;
+}
+.quick-action:hover { background: var(--bg); }
+.quick-action .qa-icon {
+  width: 34px; height: 34px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem; flex-shrink: 0;
+}
+.qa-blue   { background: var(--blue-lt); }
+.qa-green  { background: var(--green-lt); }
+.qa-amber  { background: var(--amber-lt); }
+.qa-purple { background: #f3e8ff; }
+.qa-text { font-weight: 500; }
+.qa-sub  { font-size: .75rem; color: var(--muted); }
+
+/* ── Modal ───────────────────────────────────────────────── */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,.4);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 999; padding: 20px;
+  animation: fadeIn .15s ease;
+}
+@keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+.modal {
+  background: var(--surface); border-radius: 16px;
+  width: 100%; max-width: 480px; max-height: 90vh; overflow-y: auto;
+  box-shadow: var(--shadow-lg);
+  animation: scaleIn .2s ease;
+}
+@keyframes scaleIn { from { opacity:0; transform:scale(.95); } to { opacity:1; transform:scale(1); } }
+.modal-head {
+  padding: 24px 28px 0; display: flex;
+  align-items: center; justify-content: space-between;
+}
+.modal-title { font-family: 'DM Serif Display', serif; font-size: 1.2rem; color: var(--ink); }
+.modal-close {
+  width: 30px; height: 30px; border-radius: 50%; border: none;
+  background: var(--bg); color: var(--ink2); cursor: pointer;
+  font-size: 1.1rem; display: flex; align-items: center; justify-content: center;
+}
+.modal-close:hover { background: var(--line); }
+.modal-body { padding: 20px 28px 28px; }
+
+/* ── Empty state ─────────────────────────────────────────── */
+.empty { text-align: center; padding: 48px 24px; color: var(--muted); }
+.empty-icon { font-size: 2.5rem; margin-bottom: 12px; }
+.empty-text { font-size: .9rem; }
+
+/* ── Footer ──────────────────────────────────────────────── */
+footer {
+  text-align: center; padding: 20px;
+  font-size: .78rem; color: var(--muted);
+  border-top: 1px solid var(--line); background: var(--surface);
+}
+
+/* ── Utility ─────────────────────────────────────────────── */
+.hidden { display: none !important; }
+.mt-8  { margin-top: 8px; }
+.mt-16 { margin-top: 16px; }
+.divider { height: 1px; background: var(--line); margin: 16px 0; }
+.text-muted { color: var(--muted); font-size: .85rem; }
+.flex-gap { display: flex; gap: 8px; flex-wrap: wrap; }
+</style>
+</head>
+<body>
+<div class="app" id="app">
+
+<!-- ── NAV ─────────────────────────────────────────────── -->
+<nav class="nav">
+  <div class="nav-logo" onclick="goHome()">UEMS<span>.</span></div>
+  <span style="font-size:.75rem;color:var(--muted);font-family:'JetBrains Mono',monospace;">BCSE301L</span>
+  <div class="nav-spacer"></div>
+  <div class="nav-user" id="nav-user" style="display:none">
+    <div class="nav-avatar" id="nav-avatar">A</div>
+    <span id="nav-name" style="font-weight:500"></span>
+    <span class="nav-badge" id="nav-badge"></span>
+    <button class="btn btn-secondary btn-sm" onclick="logout()">Logout</button>
+  </div>
+</nav>
+
+<!-- ── SPLASH / AUTH ────────────────────────────────────── -->
+<div id="screen-auth" class="splash">
+  <div class="splash-inner">
+    <span class="splash-badge">BCSE301L — Software Engineering</span>
+    <h1 class="splash-title">University<br/><em>Event Management</em><br/>System</h1>
+    <p class="splash-sub">Centralised event registration, management, and analytics for VIT Vellore.</p>
+
+    <div class="card">
+      <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('login')" id="tab-login">Login</button>
+        <button class="tab-btn" onclick="switchTab('register')" id="tab-register">Register</button>
+      </div>
+
+      <!-- Login form -->
+      <div id="form-login">
+        <div id="auth-msg"></div>
+        <div class="form-group">
+          <label class="form-label">Institutional Email</label>
+          <input class="form-input" id="login-email" type="email" placeholder="yourname@vit.ac.in"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input class="form-input" id="login-password" type="password" placeholder="••••••••"/>
+        </div>
+        <button class="btn btn-primary" onclick="handleLogin()">Sign In →</button>
+        <div class="divider"></div>
+        <p class="text-muted" style="text-align:center;font-size:.78rem">
+          Demo accounts — Admin: <code>admin@vit.ac.in</code> / <code>Admin@123</code><br/>
+          Faculty: <code>smith@vit.ac.in</code> / <code>Faculty@123</code><br/>
+          Student: <code>john.doe@vit.ac.in</code> / <code>Student@123</code>
+        </p>
+      </div>
+
+      <!-- Register form -->
+      <div id="form-register" class="hidden">
+        <div id="reg-msg"></div>
+        <div class="form-group">
+          <label class="form-label">Full Name</label>
+          <input class="form-input" id="reg-name" type="text" placeholder="e.g. Arjun Sharma"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Institutional Email</label>
+          <input class="form-input" id="reg-email" type="email" placeholder="yourname@vit.ac.in"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input class="form-input" id="reg-password" type="password" placeholder="Min 8 chars, 1 upper, 1 digit, 1 special"/>
+          <span class="form-hint">e.g. SecureP@ss1</span>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Role</label>
+            <select class="form-select" id="reg-role" onchange="toggleStudentId()">
+              <option value="student">Student</option>
+              <option value="faculty">Faculty</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+          <div class="form-group" id="sid-group">
+            <label class="form-label">Student ID</label>
+            <input class="form-input" id="reg-sid" type="text" placeholder="e.g. 22BCE1001"/>
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="handleRegister()">Create Account →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── DASHBOARD ─────────────────────────────────────────── -->
+<div id="screen-dashboard" class="main hidden">
+
+  <!-- Stats -->
+  <h1 class="page-title" id="dash-greeting">Good morning</h1>
+  <p class="page-sub" id="dash-sub">Here's what's happening on campus today.</p>
+
+  <div class="stats-grid" id="stats-grid"></div>
+
+  <div class="content-grid">
+    <!-- Main column -->
+    <div>
+      <!-- Events list -->
+      <div class="card" style="margin-bottom:24px">
+        <div class="sec-head">
+          <span class="sec-title">📅 Events</span>
+          <span class="sec-count" id="events-count">0 events</span>
+        </div>
+        <div id="events-list"><div class="empty"><div class="empty-icon">📋</div><div class="empty-text">No events yet.</div></div></div>
+      </div>
+
+      <!-- Users table (admin only) -->
+      <div class="card hidden" id="users-section">
+        <div class="sec-head">
+          <span class="sec-title">👥 Registered Users</span>
+          <span class="sec-count" id="users-count">0 users</span>
+        </div>
+        <div id="users-table-wrap"></div>
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="card">
+        <div class="card-title" style="font-size:1rem;margin-bottom:14px">Quick Actions</div>
+        <div id="quick-actions"></div>
+      </div>
+
+      <!-- My registrations -->
+      <div class="card" id="my-reg-card">
+        <div class="card-title" style="font-size:1rem;margin-bottom:14px">My Registrations</div>
+        <div id="my-reg-list"><p class="text-muted" style="font-size:.8rem">Not registered for any events yet.</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── TEST SUITE SCREEN ─────────────────────────────────── -->
+<div id="screen-tests" class="main hidden">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <button class="btn btn-secondary btn-sm" onclick="goBackToDashboard()">← Back to Dashboard</button>
+    <button class="btn btn-primary btn-sm" onclick="runAllTests()">⟳ Rerun Tests</button>
+  </div>
+  <h1 class="page-title">Automated Test Suite</h1>
+  <p class="page-sub">All FR1, FR2, NFR1, NFR2 test cases. Data store is reset before running.</p>
+  <div id="test-results"></div>
+</div>
+
+<!-- ── MODALS ─────────────────────────────────────────────── -->
+<div id="modal-overlay" class="modal-overlay hidden" onclick="closeModal(event)">
+  <div class="modal" id="modal-box">
+    <div class="modal-head">
+      <span class="modal-title" id="modal-title">Modal</span>
+      <button class="modal-close" onclick="closeModalDirect()">✕</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+
+</div><!-- /app -->
+<footer>UEMS &mdash; University Event Management System &nbsp;|&nbsp; BCSE301L &nbsp;|&nbsp; VIT Vellore</footer>
+
+<script>
+// ================================================================
+//  DATA STORES
+// ================================================================
+let users          = {};
+let events_db      = {};
+let registrations  = {};
+let login_attempts = {};
+let current_user   = null;
+
+const MAX_ATTEMPTS    = 5;
+const LOCKOUT_SECONDS = 300;
+
+// ================================================================
+//  UTILITIES
+// ================================================================
+function hashPassword(pw) {
+  let h = 0;
+  for (let i = 0; i < pw.length; i++) {
+    h = (Math.imul(31, h) + pw.charCodeAt(i)) | 0;
+  }
+  return 'h' + Math.abs(h).toString(16).padStart(8, '0');
+}
+
+function validateEmail(email) {
+  return /^[a-zA-Z0-9._%+\-]+@vit\.ac\.in$/.test(email);
+}
+
+function validatePassword(pw) {
+  return pw.length >= 8 && /[A-Z]/.test(pw) && /\d/.test(pw) && /[!@#$%^&*(),.?":{}|<>]/.test(pw);
+}
+
+function generateEventId(title) {
+  let h = Date.now();
+  for (let c of title) h = ((h << 5) - h + c.charCodeAt(0)) | 0;
+  return 'EVT-' + Math.abs(h).toString(16).slice(0,6).toUpperCase();
+}
+
+function now() { return Date.now() / 1000; }
+
+// ================================================================
+//  FR1 – USER REGISTRATION
+// ================================================================
+function registerUser(name, email, password, role, student_id = '') {
+  if (!name.trim())
+    return { success: false, message: 'Name cannot be empty.' };
+  if (!validateEmail(email))
+    return { success: false, message: 'Email must end with @vit.ac.in' };
+  if (users[email])
+    return { success: false, message: 'An account with this email already exists.' };
+  if (!validatePassword(password))
+    return { success: false, message: 'Password must be ≥8 chars with 1 uppercase, 1 digit, 1 special character.' };
+  if (!['student','faculty','admin'].includes(role))
+    return { success: false, message: 'Invalid role.' };
+  if (role === 'student' && !student_id.trim())
+    return { success: false, message: 'Student ID is required for student accounts.' };
+
+  users[email] = {
+    name: name.trim(), email,
+    password_hash: hashPassword(password),
+    role, student_id: student_id.trim(),
+    created_at: new Date().toLocaleString(),
+  };
+  return { success: true, message: `'${name}' registered successfully as ${role}.` };
+}
+
+// ================================================================
+//  FR2 – EVENT CREATE & REGISTER
+// ================================================================
+function createEvent(organizer_email, title, date_str, capacity) {
+  if (!users[organizer_email])
+    return { success: false, message: 'Organizer account not found.' };
+  if (!['faculty','admin'].includes(users[organizer_email].role))
+    return { success: false, message: 'Only faculty or admin can create events.' };
+  if (!title.trim())
+    return { success: false, message: 'Event title cannot be empty.' };
+
+  const d = new Date(date_str);
+  if (isNaN(d)) return { success: false, message: 'Invalid date. Use YYYY-MM-DD.' };
+  if (d < new Date(new Date().toDateString()))
+    return { success: false, message: 'Event date cannot be in the past.' };
+
+  const cap = parseInt(capacity);
+  if (isNaN(cap) || cap <= 0)
+    return { success: false, message: 'Capacity must be a positive whole number.' };
+
+  const eid = generateEventId(title + Date.now());
+  events_db[eid] = { title: title.trim(), date: date_str, organizer: organizer_email, capacity: cap, registered: [] };
+  return { success: true, message: `Event '${title}' created.`, event_id: eid };
+}
+
+function registerForEvent(user_email, event_id) {
+  if (!users[user_email])
+    return { success: false, message: 'User not found.' };
+  if (users[user_email].role !== 'student')
+    return { success: false, message: 'Only students can register for events.' };
+  if (!events_db[event_id])
+    return { success: false, message: 'Event ID not found.' };
+
+  const ev = events_db[event_id];
+  if (ev.registered.includes(user_email))
+    return { success: false, message: 'You are already registered for this event.' };
+  if (ev.registered.length >= ev.capacity)
+    return { success: false, message: `Event is fully booked. (Capacity: ${ev.capacity})` };
+
+  ev.registered.push(user_email);
+  registrations[user_email + '|' + event_id] = new Date().toLocaleString();
+  return { success: true, message: `Enrolled in '${ev.title}'. Seat #${ev.registered.length}/${ev.capacity}` };
+}
+
+// ================================================================
+//  NFR1 – SECURE LOGIN
+// ================================================================
+function loginUser(email, password) {
+  const t = now();
+  let attempts = (login_attempts[email] || []).filter(ts => t - ts < LOCKOUT_SECONDS);
+  login_attempts[email] = attempts;
+
+  if (attempts.length >= MAX_ATTEMPTS) {
+    const left = Math.ceil(LOCKOUT_SECONDS - (t - attempts[0]));
+    return { success: false, message: `Account locked. Try again in ${left}s.` };
+  }
+  if (!users[email] || users[email].password_hash !== hashPassword(password)) {
+    login_attempts[email] = [...attempts, t];
+    const rem = MAX_ATTEMPTS - login_attempts[email].length;
+    return { success: false, message: `Invalid credentials. ${rem} attempt(s) remaining before lockout.` };
+  }
+  login_attempts[email] = [];
+  return { success: true, message: `Welcome back, ${users[email].name}!`, user: users[email] };
+}
+
+// ================================================================
+//  SEED DATA
+// ================================================================
+function seedData() {
+  registerUser('Admin User',  'admin@vit.ac.in',     'Admin@123',   'admin',   '');
+  registerUser('Dr. Smith',   'smith@vit.ac.in',     'Faculty@123', 'faculty', '');
+  registerUser('John Doe',    'john.doe@vit.ac.in',  'Student@123', 'student', '22BCE1001');
+  registerUser('Meena Raj',   'meena.raj@vit.ac.in', 'Hello@123',   'student', '22BCE2001');
+
+  createEvent('smith@vit.ac.in',  'TechFest 2026',    '2026-05-15', 100);
+  createEvent('admin@vit.ac.in',  'Hackathon 2026',   '2026-06-20', 50);
+  createEvent('smith@vit.ac.in',  'AI Workshop',      '2026-07-10', 30);
+  createEvent('admin@vit.ac.in',  'Cultural Night',   '2026-08-05', 200);
+
+  // Pre-register John for TechFest
+  const eids = Object.keys(events_db);
+  if (eids.length > 0) registerForEvent('john.doe@vit.ac.in', eids[0]);
+}
+
+// ================================================================
+//  NAVIGATION FUNCTIONS (FIXED)
+// ================================================================
+function goHome() {
+  if (current_user) {
+    showDashboard();
+  } else {
+    document.getElementById('screen-dashboard').classList.add('hidden');
+    document.getElementById('screen-tests').classList.add('hidden');
+    document.getElementById('screen-auth').classList.remove('hidden');
+  }
+}
+
+function goBackToDashboard() {
+  if (current_user) {
+    showDashboard();
+  } else {
+    document.getElementById('screen-tests').classList.add('hidden');
+    document.getElementById('screen-auth').classList.remove('hidden');
+  }
+}
+
+function showDashboard() {
+  document.getElementById('screen-auth').classList.add('hidden');
+  document.getElementById('screen-tests').classList.add('hidden');
+  document.getElementById('screen-dashboard').classList.remove('hidden');
+  updateNav();
+  renderDashboard();
+}
+
+// ================================================================
+//  AUTH HANDLERS
+// ================================================================
+function switchTab(tab) {
+  document.getElementById('form-login').classList.toggle('hidden',    tab !== 'login');
+  document.getElementById('form-register').classList.toggle('hidden', tab !== 'register');
+  document.getElementById('tab-login').classList.toggle('active',    tab === 'login');
+  document.getElementById('tab-register').classList.toggle('active', tab === 'register');
+  document.getElementById('auth-msg').innerHTML = '';
+  document.getElementById('reg-msg').innerHTML  = '';
+}
+
+function toggleStudentId() {
+  const role = document.getElementById('reg-role').value;
+  document.getElementById('sid-group').classList.toggle('hidden', role !== 'student');
+}
+
+function handleLogin() {
+  const email    = document.getElementById('login-email').value.trim().toLowerCase();
+  const password = document.getElementById('login-password').value;
+  const res      = loginUser(email, password);
+
+  if (res.success) {
+    current_user = res.user;
+    showDashboard();
+  } else {
+    showMsg('auth-msg', res.message, 'error');
+  }
+}
+
+function handleRegister() {
+  const name     = document.getElementById('reg-name').value.trim();
+  const email    = document.getElementById('reg-email').value.trim().toLowerCase();
+  const password = document.getElementById('reg-password').value;
+  const role     = document.getElementById('reg-role').value;
+  const sid      = document.getElementById('reg-sid').value.trim();
+  const res      = registerUser(name, email, password, role, sid);
+
+  showMsg('reg-msg', res.message, res.success ? 'success' : 'error');
+  if (res.success) setTimeout(() => switchTab('login'), 1200);
+}
+
+function logout() {
+  current_user = null;
+  document.getElementById('screen-dashboard').classList.add('hidden');
+  document.getElementById('screen-tests').classList.add('hidden');
+  document.getElementById('screen-auth').classList.remove('hidden');
+  document.getElementById('nav-user').style.display = 'none';
+  document.getElementById('login-email').value    = '';
+  document.getElementById('login-password').value = '';
+  document.getElementById('auth-msg').innerHTML   = '';
+}
+
+// ================================================================
+//  DASHBOARD RENDERING
+// ================================================================
+function updateNav() {
+  const u = current_user;
+  document.getElementById('nav-user').style.display = 'flex';
+  document.getElementById('nav-avatar').textContent  = u.name.charAt(0).toUpperCase();
+  document.getElementById('nav-name').textContent    = u.name.split(' ')[0];
+  const badge = document.getElementById('nav-badge');
+  badge.textContent = u.role;
+  badge.className = 'nav-badge ' + u.role;
+}
+
+function renderDashboard() {
+  const u   = current_user;
+  const hr  = new Date().getHours();
+  const greet = hr < 12 ? 'Good morning' : hr < 17 ? 'Good afternoon' : 'Good evening';
+  document.getElementById('dash-greeting').textContent = `${greet}, ${u.name.split(' ')[0]} 👋`;
+  document.getElementById('dash-sub').textContent = u.role === 'student'
+    ? 'Find and register for upcoming events.' : 'Manage events and participants.';
+
+  renderStats();
+  renderEvents();
+  renderQuickActions();
+  renderMyRegistrations();
+
+  // Admin: show users table
+  const usersSection = document.getElementById('users-section');
+  if (u.role === 'admin') {
+    usersSection.classList.remove('hidden');
+    renderUsersTable();
+  } else {
+    usersSection.classList.add('hidden');
+  }
+
+  // Hide My Registrations sidebar if not student
+  document.getElementById('my-reg-card').style.display = u.role === 'student' ? '' : 'none';
+}
+
+function renderStats() {
+  const u        = current_user;
+  const totalEvs = Object.keys(events_db).length;
+  const totalUsr = Object.keys(users).length;
+  const myRegs   = u.role === 'student'
+    ? Object.values(events_db).filter(e => e.registered.includes(u.email)).length : null;
+  const totalReg = Object.values(events_db).reduce((s,e) => s + e.registered.length, 0);
+  const openEvs  = Object.values(events_db).filter(e => e.registered.length < e.capacity).length;
+
+  let stats = [];
+  if (u.role === 'student') {
+    stats = [
+      { label: 'Total Events',    value: totalEvs,  sub: 'on campus' },
+      { label: 'Open to Register',value: openEvs,   sub: 'seats available' },
+      { label: 'My Registrations',value: myRegs,    sub: 'events joined' },
+      { label: 'Registered Users',value: totalUsr,  sub: 'on platform' },
+    ];
+  } else {
+    stats = [
+      { label: 'Total Events',    value: totalEvs,  sub: 'created' },
+      { label: 'Total Students',  value: Object.values(users).filter(u=>u.role==='student').length, sub: 'registered' },
+      { label: 'Total Enrolments',value: totalReg,  sub: 'across all events' },
+      { label: 'Open Events',     value: openEvs,   sub: 'accepting registrations' },
+    ];
+  }
+
+  document.getElementById('stats-grid').innerHTML = stats.map(s => `
+    <div class="stat-card">
+      <div class="stat-label">${s.label}</div>
+      <div class="stat-value">${s.value}</div>
+      <div class="stat-sub">${s.sub}</div>
+    </div>`).join('');
+}
+
+function renderEvents() {
+  const u    = current_user;
+  const eids = Object.keys(events_db);
+  document.getElementById('events-count').textContent = eids.length + ' event' + (eids.length !== 1 ? 's' : '');
+
+  if (eids.length === 0) {
+    document.getElementById('events-list').innerHTML =
+      '<div class="empty"><div class="empty-icon">📋</div><div class="empty-text">No events yet. Create one!</div></div>';
+    return;
+  }
+
+  document.getElementById('events-list').innerHTML = eids.map(eid => {
+    const ev    = events_db[eid];
+    const taken = ev.registered.length;
+    const pct   = Math.round((taken / ev.capacity) * 100);
+    const left  = ev.capacity - taken;
+    const mine  = u.role === 'student' && ev.registered.includes(u.email);
+    const full  = taken >= ev.capacity;
+    const limited = pct >= 70;
+
+    const tagClass = full ? 'tag-full' : mine ? 'tag-mine' : limited ? 'tag-limited' : 'tag-open';
+    const tagText  = full ? 'Full' : mine ? 'Registered' : limited ? 'Limited' : 'Open';
+    const barClass = full ? 'progress-red' : limited ? 'progress-amber' : 'progress-green';
+
+    const canRegister = u.role === 'student' && !mine && !full;
+    const isOrganizer = u.role !== 'student' && ev.organizer === u.email;
+
+    return `
+    <div class="event-card">
+      <div>
+        <div class="event-title">${ev.title}</div>
+        <div class="event-meta">
+          <span>📅 ${ev.date}</span>
+          <span>👤 ${users[ev.organizer]?.name || ev.organizer}</span>
+          <span>🪑 ${left} seats left</span>
+        </div>
+        <div class="event-progress">
+          <div class="progress-bar"><div class="progress-fill ${barClass}" style="width:${pct}%"></div></div>
+          <div class="progress-label">${taken} / ${ev.capacity} registered (${pct}%)</div>
+        </div>
+      </div>
+      <div class="event-actions">
+        <span class="tag ${tagClass}">${tagText}</span>
+        ${canRegister ? `<button class="btn btn-primary btn-sm" onclick="doRegisterForEvent('${eid}')">Register</button>` : ''}
+        ${mine        ? `<button class="btn btn-secondary btn-sm" style="color:var(--green)">✓ Enrolled</button>` : ''}
+        ${isOrganizer ? `<button class="btn btn-secondary btn-sm" onclick="showAttendees('${eid}')">View List</button>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderQuickActions() {
+  const u   = current_user;
+  let html  = '';
+
+  if (u.role === 'student') {
+    html = `
+      <button class="quick-action" onclick="scrollToEvents()">
+        <div class="qa-icon qa-blue">📅</div>
+        <div><div class="qa-text">Browse Events</div><div class="qa-sub">Find and register</div></div>
+      </button>`;
+  }
+
+  if (['faculty','admin'].includes(u.role)) {
+    html += `
+      <button class="quick-action" onclick="openCreateEvent()">
+        <div class="qa-icon qa-green">✚</div>
+        <div><div class="qa-text">Create Event</div><div class="qa-sub">New event listing</div></div>
+      </button>`;
+  }
+
+  html += `
+    <button class="quick-action" onclick="openRegisterUser()">
+      <div class="qa-icon qa-amber">👤</div>
+      <div><div class="qa-text">Add User</div><div class="qa-sub">Register new account</div></div>
+    </button>
+    <button class="quick-action" onclick="openRunTests()">
+      <div class="qa-icon qa-purple">🧪</div>
+      <div><div class="qa-text">Run Test Suite</div><div class="qa-sub">FR1, FR2, NFR1, NFR2</div></div>
+    </button>`;
+
+  if (u.role === 'admin') {
+    html += `
+      <button class="quick-action" onclick="runPerfTest()">
+        <div class="qa-icon qa-green">⚡</div>
+        <div><div class="qa-text">Performance Test</div><div class="qa-sub">NFR2 benchmark</div></div>
+      </button>`;
+  }
+
+  document.getElementById('quick-actions').innerHTML = html;
+}
+
+function renderMyRegistrations() {
+  const u = current_user;
+  if (u.role !== 'student') return;
+  const mine = Object.entries(events_db).filter(([,ev]) => ev.registered.includes(u.email));
+  if (mine.length === 0) {
+    document.getElementById('my-reg-list').innerHTML = '<p class="text-muted" style="font-size:.8rem">Not registered for any events yet.</p>';
+    return;
+  }
+  document.getElementById('my-reg-list').innerHTML = mine.map(([eid,ev]) => `
+    <div style="padding:8px 0;border-bottom:1px solid var(--bg)">
+      <div style="font-size:.875rem;font-weight:500">${ev.title}</div>
+      <div style="font-size:.75rem;color:var(--muted)">${ev.date} &middot; Seat #${ev.registered.indexOf(u.email)+1}</div>
+    </div>`).join('');
+}
+
+function renderUsersTable() {
+  const us = Object.values(users);
+  document.getElementById('users-count').textContent = us.length + ' user' + (us.length !== 1 ? 's' : '');
+  document.getElementById('users-table-wrap').innerHTML = `
+    <table class="users-table">
+      <thead><tr>
+        <th>Name</th><th>Email</th><th>Role</th><th>Student ID</th><th>Joined</th>
+      </tr></thead>
+      <tbody>
+        ${us.map(u => `<tr>
+          <td style="font-weight:500;color:var(--ink)">${u.name}</td>
+          <td style="font-family:'JetBrains Mono',monospace;font-size:.78rem">${u.email}</td>
+          <td><span class="role-chip role-${u.role}">${u.role}</span></td>
+          <td style="color:var(--muted)">${u.student_id || '—'}</td>
+          <td style="color:var(--muted);font-size:.78rem">${u.created_at}</td>
+        </tr>`).join('')}
+      </tbody>
+    </table>`;
+}
+
+// ================================================================
+//  EVENT ACTIONS
+// ================================================================
+function doRegisterForEvent(eid) {
+  const res = registerForEvent(current_user.email, eid);
+  showToast(res.message, res.success ? 'success' : 'error');
+  if (res.success) renderDashboard();
+}
+
+function showAttendees(eid) {
+  const ev = events_db[eid];
+  const list = ev.registered.length === 0
+    ? '<p class="text-muted">No registrations yet.</p>'
+    : `<table class="users-table" style="margin-top:8px">
+        <thead><tr><th>#</th><th>Name</th><th>Email</th><th>Student ID</th></tr></thead>
+        <tbody>
+          ${ev.registered.map((email, i) => `<tr>
+            <td style="color:var(--muted)">${i+1}</td>
+            <td style="font-weight:500">${users[email]?.name || email}</td>
+            <td style="font-size:.78rem;font-family:'JetBrains Mono',monospace">${email}</td>
+            <td style="color:var(--muted)">${users[email]?.student_id || '—'}</td>
+          </tr>`).join('')}
+        </tbody>
+      </table>`;
+  openModal(`${ev.title} — Attendees (${ev.registered.length}/${ev.capacity})`, list);
+}
+
+// ================================================================
+//  QUICK ACTION MODALS
+// ================================================================
+function openCreateEvent() {
+  openModal('Create New Event', `
+    <div id="create-ev-msg"></div>
+    <div class="form-group">
+      <label class="form-label">Event Title</label>
+      <input class="form-input" id="ce-title" placeholder="e.g. TechFest 2026"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Date (YYYY-MM-DD)</label>
+      <input class="form-input" id="ce-date" type="date"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Max Capacity</label>
+      <input class="form-input" id="ce-cap" type="number" min="1" placeholder="e.g. 100"/>
+    </div>
+    <button class="btn btn-primary" onclick="submitCreateEvent()">Create Event →</button>
+  `);
+}
+
+function submitCreateEvent() {
+  const res = createEvent(
+    current_user.email,
+    document.getElementById('ce-title').value.trim(),
+    document.getElementById('ce-date').value,
+    document.getElementById('ce-cap').value,
+  );
+  showMsg('create-ev-msg', res.message, res.success ? 'success' : 'error');
+  if (res.success) { setTimeout(() => { closeModalDirect(); renderDashboard(); }, 1000); }
+}
+
+function openRegisterUser() {
+  openModal('Register New User', `
+    <div id="nu-msg"></div>
+    <div class="form-group">
+      <label class="form-label">Full Name</label>
+      <input class="form-input" id="nu-name"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Institutional Email</label>
+      <input class="form-input" id="nu-email" placeholder="name@vit.ac.in"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Password</label>
+      <input class="form-input" id="nu-pass" type="password"/>
+      <span class="form-hint">Min 8 chars, 1 upper, 1 digit, 1 special</span>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Role</label>
+        <select class="form-select" id="nu-role" onchange="document.getElementById('nu-sid-g').style.display=this.value==='student'?'':'none'">
+          <option value="student">Student</option>
+          <option value="faculty">Faculty</option>
+          <option value="admin">Admin</option>
+        </select>
+      </div>
+      <div class="form-group" id="nu-sid-g">
+        <label class="form-label">Student ID</label>
+        <input class="form-input" id="nu-sid" placeholder="22BCE1001"/>
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="submitRegisterUser()">Register User →</button>
+  `);
+}
+
+function submitRegisterUser() {
+  const role = document.getElementById('nu-role').value;
+  const res  = registerUser(
+    document.getElementById('nu-name').value.trim(),
+    document.getElementById('nu-email').value.trim().toLowerCase(),
+    document.getElementById('nu-pass').value,
+    role,
+    role === 'student' ? document.getElementById('nu-sid').value.trim() : '',
+  );
+  showMsg('nu-msg', res.message, res.success ? 'success' : 'error');
+  if (res.success && current_user.role === 'admin') { 
+    setTimeout(() => { closeModalDirect(); renderDashboard(); }, 1000);
+  }
+}
+
+function openRunTests() {
+  closeModalDirect();
+  document.getElementById('screen-dashboard').classList.add('hidden');
+  document.getElementById('screen-auth').classList.add('hidden');
+  document.getElementById('screen-tests').classList.remove('hidden');
+  runAllTests();
+}
+
+// ================================================================
+//  TEST SUITE
+// ================================================================
+function runAllTests() {
+  // Reset data stores
+  const savedUser = current_user;
+  users = {}; events_db = {}; registrations = {}; login_attempts = {};
+  seedData();
+
+  const results = [];
+  let passed = 0, failed = 0;
+
+  function check(id, type, desc, result, shouldSucceed) {
+    const ok = result.success === shouldSucceed;
+    if (ok) passed++; else failed++;
+    results.push({ id, type, desc, msg: result.message, ok });
+  }
+
+  // FR1
+  check('TC-FR1-V1','VALID',  'Valid student registration',        registerUser('Arjun Sharma','arjun.sharma@vit.ac.in','SecureP@ss1','student','22BCE1001'), true);
+  check('TC-FR1-V2','VALID',  'Valid faculty registration',        registerUser('Dr. Priya Nair','priya.nair@vit.ac.in','Faculty#99','faculty'), true);
+  check('TC-FR1-I1','INVALID','Empty name field',                  registerUser('','blank@vit.ac.in','SecureP@ss1','student','22BCE1099'), false);
+  check('TC-FR1-I2','INVALID','Non-institutional email',           registerUser('Test','test@gmail.com','SecureP@ss1','student','22BCE1100'), false);
+  check('TC-FR1-I3','INVALID','Weak password',                     registerUser('Test','testpass@vit.ac.in','weakpass','student','22BCE1101'), false);
+  check('TC-FR1-I4','INVALID','Duplicate email',                   registerUser('Arjun Sharma','arjun.sharma@vit.ac.in','SecureP@ss1','student','22BCE1001'), false);
+  check('TC-FR1-I5','INVALID','Student with no Student ID',        registerUser('NoID','noid@vit.ac.in','SecureP@ss1','student',''), false);
+
+  // FR2
+  const ev1 = createEvent('priya.nair@vit.ac.in','TechFest 2026','2026-05-15',100);
+  const eid1 = ev1.event_id;
+  check('TC-FR2-V1','VALID',  'Faculty creates event',             ev1, true);
+  check('TC-FR2-V2','VALID',  'Student enrols in event',           registerForEvent('arjun.sharma@vit.ac.in', eid1), true);
+  check('TC-FR2-I1','INVALID','Duplicate registration',            registerForEvent('arjun.sharma@vit.ac.in', eid1), false);
+  check('TC-FR2-I2','INVALID','Faculty tries to enrol',            registerForEvent('priya.nair@vit.ac.in',   eid1), false);
+  check('TC-FR2-I3','INVALID','Non-existent event ID',             registerForEvent('arjun.sharma@vit.ac.in', 'EVT-ZZZZZZ'), false);
+  const ev2 = createEvent('priya.nair@vit.ac.in','Mini Workshop','2026-06-01',1);
+  registerUser('Meena Raj','meena.raj@vit.ac.in','Hello@123','student','22BCE2001');
+  registerUser('Kiran Das','kiran.das@vit.ac.in','Hello@456','student','22BCE2002');
+  registerForEvent('meena.raj@vit.ac.in', ev2.event_id);
+  check('TC-FR2-I4','INVALID','Event at full capacity',            registerForEvent('kiran.das@vit.ac.in', ev2.event_id), false);
+
+  // NFR1
+  for (let i = 0; i < 5; i++) loginUser('arjun.sharma@vit.ac.in','WrongPass!');
+  const locked = loginUser('arjun.sharma@vit.ac.in','SecureP@ss1');
+  const lockedOk = !locked.success && locked.message.toLowerCase().includes('locked');
+  if (lockedOk) passed++; else failed++;
+  results.push({ id:'TC-NFR1-I1', type:'INVALID', desc:'Account locked after 5 fails', msg: locked.message, ok: lockedOk });
+
+  registerUser('Sneha Patel','sneha.patel@vit.ac.in','Secure@789','student','22BCE3001');
+  check('TC-NFR1-V1','VALID',  'Valid login fresh account',        loginUser('sneha.patel@vit.ac.in','Secure@789'), true);
+  check('TC-NFR1-I2','INVALID','Wrong password, attempts shown',   loginUser('sneha.patel@vit.ac.in','WRONGPASS'), false);
+
+  // NFR2
+  const t0 = performance.now();
+  for (let i = 0; i < 1000; i++)
+    registerUser(`Perf ${i}`,`p${i.toString().padStart(4,'0')}@vit.ac.in`,`Bench@${i.toString().padStart(4,'0')}`,'student',`22P${i.toString().padStart(4,'0')}`);
+  const elapsed = ((performance.now() - t0) / 1000).toFixed(4);
+  const perfPassed = parseFloat(elapsed) < 2.0;
+  if (perfPassed) passed++; else failed++;
+  results.push({ id:'TC-NFR2-V1', type:'VALID', desc:'1000 registrations in < 2s', msg:`${elapsed}s (limit: 2.0s)`, ok: perfPassed });
+
+  // Restore data
+  users = {}; events_db = {}; registrations = {}; login_attempts = {};
+  seedData();
+  current_user = savedUser;
+
+  // Render results
+  const cats = [
+    ['FR1',  'User Registration',  results.filter(r => r.id.includes('FR1'))],
+    ['FR2',  'Event Registration', results.filter(r => r.id.includes('FR2'))],
+    ['NFR1', 'Security / Login',   results.filter(r => r.id.includes('NFR1'))],
+    ['NFR2', 'Performance',        results.filter(r => r.id.includes('NFR2'))],
+  ];
+
+  const html = `
+    <div class="card" style="margin-bottom:20px">
+      <div style="display:flex;gap:24px;align-items:center">
+        <div><div class="stat-label">Total</div><div class="stat-value">${passed+failed}</div></div>
+        <div><div class="stat-label">Passed</div><div class="stat-value" style="color:var(--green)">${passed}</div></div>
+        <div><div class="stat-label">Failed</div><div class="stat-value" style="color:var(--red)">${failed}</div></div>
+        <div style="flex:1"></div>
+        <div style="font-size:1.2rem;font-weight:700;color:${failed===0?'var(--green)':'var(--red)'}">
+          ${failed===0 ? '✅ ALL TESTS PASSED' : `❌ ${failed} FAILED`}
+        </div>
+      </div>
+    </div>
+    ${cats.map(([prefix, name, rs]) => `
+      <div class="card test-section" style="margin-bottom:16px">
+        <div class="test-section-title">${prefix} — ${name}</div>
+        ${rs.map(r => `
+          <div class="test-row">
+            <span class="test-id">${r.id}</span>
+            <span class="test-type-badge ${r.type==='VALID'?'type-valid':'type-invalid'}">${r.type}</span>
+            <div>
+              <div class="test-desc">${r.desc}</div>
+              <div class="test-msg">→ ${r.msg}</div>
+            </div>
+            <span class="${r.ok?'status-pass':'status-fail'}">${r.ok?'PASS':'FAIL'}</span>
+          </div>`).join('')}
+      </div>`).join('')}`;
+
+  document.getElementById('test-results').innerHTML = html;
+}
+
+// ================================================================
+//  PERFORMANCE MODAL
+// ================================================================
+function runPerfTest() {
+  const t0 = performance.now();
+  let ok = 0;
+  for (let i = 9000; i < 10000; i++) {
+    const r = registerUser(`PerfU ${i}`,`pf${i}@vit.ac.in`,`Bench@${i}`,'student',`22P${i}`);
+    if (r.success) ok++;
+  }
+  const elapsed = ((performance.now() - t0) / 1000).toFixed(4);
+  const pct = Math.min(100, Math.round((parseFloat(elapsed) / 2.0) * 100));
+  const pass = parseFloat(elapsed) < 2.0;
+
+  openModal('NFR2 — Performance Benchmark', `
+    <div class="perf-row">
+      <span class="perf-label">Registrations Attempted</span>
+      <span class="perf-value">1,000</span>
+    </div>
+    <div class="perf-row">
+      <span class="perf-label">Successful</span>
+      <span class="perf-value">${ok}</span>
+    </div>
+    <div class="perf-row">
+      <span class="perf-label">Time Taken</span>
+      <span class="perf-value">${elapsed}s</span>
+      <div class="perf-bar-wrap"><div class="perf-bar-fill" style="width:${pct}%;background:${pass?'var(--green)':'var(--red)'}"></div></div>
+    </div>
+    <div class="perf-row">
+      <span class="perf-label">Threshold</span>
+      <span class="perf-value">2.0s</span>
+    </div>
+    <div class="perf-row">
+      <span class="perf-label">Result</span>
+      <span class="perf-value" style="color:${pass?'var(--green)':'var(--red)'}">${pass?'✅ PASS':'❌ FAIL'}</span>
+    </div>
+  `);
+}
+
+// ================================================================
+//  MODAL HELPERS
+// ================================================================
+function openModal(title, body) {
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-body').innerHTML    = body;
+  document.getElementById('modal-overlay').classList.remove('hidden');
+}
+
+function closeModal(e) {
+  if (e.target === document.getElementById('modal-overlay')) closeModalDirect();
+}
+
+function closeModalDirect() {
+  document.getElementById('modal-overlay').classList.add('hidden');
+}
+
+function scrollToEvents() {
+  document.querySelector('.events-list')?.scrollIntoView({ behavior: 'smooth' });
+}
+
+// ================================================================
+//  UI HELPERS
+// ================================================================
+function showMsg(id, msg, type) {
+  document.getElementById(id).innerHTML = `<div class="alert alert-${type === 'success' ? 'success' : type === 'error' ? 'error' : type}">${msg}</div>`;
+}
+
+let toastTimer;
+function showToast(msg, type = 'info') {
+  let t = document.getElementById('toast');
+  if (!t) {
+    t = document.createElement('div');
+    t.id = 'toast';
+    t.style.cssText = 'position:fixed;bottom:24px;right:24px;z-index:9999;max-width:340px;animation:slideIn .2s ease';
+    document.body.appendChild(t);
+  }
+  t.innerHTML = `<div class="alert alert-${type === 'success' ? 'success' : type === 'error' ? 'error' : 'info'}">${msg}</div>`;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { t.innerHTML = ''; }, 3500);
+}
+
+// ================================================================
+//  INIT
+// ================================================================
+seedData();
+</script>
+</body>
+</html>
