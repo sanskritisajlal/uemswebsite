@@ -1,1 +1,0 @@
-int(int(x*e,^(-x^2/y) x, y, inf),y,0,inf)
